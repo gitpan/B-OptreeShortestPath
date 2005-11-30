@@ -10,11 +10,11 @@ B::OptreeShortestPath - The great new B::OptreeShortestPath!
 
 =head1 VERSION
 
-Version 0.01
+Version 0.02
 
 =cut
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 =head1 DESCRIPTION
 
@@ -101,10 +101,18 @@ sub B::OP::all_paths {
     return "$cx SELF" if $cx =~ /\b$$op\b/;
 
     return (
-        ( $op->can('next')    ? $op->next->all_paths("$cx$$op N ")   : () ),
-        ( $op->can('first')   ? $op->first->all_paths("$cx$$op F")   : () ),
-        ( $op->can('other')   ? $op->other->all_paths("$cx$$op O")   : () ),
-        ( $op->can('sibling') ? $op->sibling->all_paths("$cx$$op S") : () )
+        (     $cx =~ /^(?:\d+ S )*(?:\d+ N )*$/
+            ? $op->next->all_paths("$cx$$op N ")
+            : ()
+        ),
+        (   $cx =~ /^(?:\d+ S )*(?:\d+ N )*(?:\d+ [FS] )*$/
+                && $op->can('first') ? $op->first->all_paths("$cx$$op F ")
+            : ()
+        ),
+        (   $cx =~ /^(?:\d+ S )*(?:\d+ N )*(?:\d+ [FS] )*$/
+                && $op->can('sibling') ? $op->sibling->all_paths("$cx$$op S ")
+            : ()
+        ),
     );
 }
 
